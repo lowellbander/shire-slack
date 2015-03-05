@@ -12,6 +12,7 @@ app.get('/', function(request, response) {
 
 app.get('/echo', function(request, response) {
 
+  /*
   request.post(
     process.env.TEST_WEBHOOK,
     { form: { key: 'value' } },
@@ -21,6 +22,7 @@ app.get('/echo', function(request, response) {
         }
     }
   );
+  */
 
   response.send('text: ' + request.query.text +
         ' and url is: ' + process.env.TEST_WEBHOOK);
