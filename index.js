@@ -14,7 +14,7 @@ app.get('/echo', function(request, response) {
 
   request.post(
     process.env.TEST_WEBHOOK,
-    { payload: { text: 'look at this text' } },
+    { form: { key: 'value' } },
     function (error, response, body) {
         if (!error && response.statusCode == 200) {
             console.log(body)
