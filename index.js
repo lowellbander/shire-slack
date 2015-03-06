@@ -18,13 +18,29 @@ app.get('/', function(request, response) {
   response.send('Hello World!');
 });
 
+var insertDocuments = function (db, callback) {
+    var collection = db.collection('documents');
+    collection.insert([
+        { a : 1 }, { b : 2}, {c : 3}
+    ], function (err, result) {
+      // assert.equal(err, null);
+      // assert.equal(3, result.result.n);
+      // assert.equal(3, result.ops.length);
+      // console.log("Inserted 3 documents into the collection");
+      callback(result);
+    });
+}
+
 app.get('/mongo-test', function(request, response) {
   MongoClient.connect(process.env.MONGOLAB_URI, function(err, db) {
     assert.equal(null, err);
     console.log('Slack successfully triggered a database connection');
-    db.close();
-  })
-})
+    insertDocuments(db, function(){
+      db.close();
+    });
+    //db.close();
+  });
+});
 
 app.get('/test', function(request, response) {
 
