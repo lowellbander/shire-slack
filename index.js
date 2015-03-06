@@ -18,6 +18,22 @@ app.get('/', function(request, response) {
   response.send('Hello World!');
 });
 
+var notifyGovernment = function (message) {
+  var payload = '{"text": \"' + message + '\"}'
+  var options = {
+    uri: process.env.GOV_WEBHOOK,
+    form: payload
+  };
+  Request.post(options, function(error, response, body) {
+    if (!error && response.statusCode == 200) {
+      console.log(body.name);
+    } else {
+      console.log('error: '+ response.statusCode + body);
+      console.log(payload);
+    } 
+  });
+};
+
 // propose legislation
 app.get('/propose', function (request, response) {
   MongoClient.connect(process.env.MONGOLAB_URI, function (err, db) {
@@ -29,6 +45,13 @@ app.get('/propose', function (request, response) {
       sponsor: sponsor
     }], function (err, result) {
       console.log(sponsor + ': ' + legislation);
+      console.log(result);
+      // send a message to slack
+      var message = sponsor + " proposes bill `" + 
+        result[0]['_id'] + "`: _" + legislation + "_";
+      notifyGovernment(message);
+      console.log(message);
+      db.close();
     });
   }); 
 });
