@@ -12,9 +12,10 @@ app.get('/', function(request, response) {
 
 app.get('/test', function(request, response) {
 
+  var payload = '{"text": \"Your text: ' + request.query.text + '\"}'
   var options = {
     uri: process.env.TEST_WEBHOOK,
-    form: '{"text": "This code ..."}'
+    form: payload
   };
   Request.post(options, function(error, response, body) {
     if (!error && response.statusCode == 200) {
@@ -24,7 +25,7 @@ app.get('/test', function(request, response) {
     } 
   });
 
-  response.send('you reached the test endpoint');
+  response.send('you reached the test endpoint: ' + request.query.text);
 });
 
 app.get('/echo', function(request, response) {
