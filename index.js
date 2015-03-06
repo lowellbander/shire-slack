@@ -10,6 +10,11 @@ app.get('/', function(request, response) {
   response.send('Hello World!');
 });
 
+app.get('/test', function(request, response) {
+  //
+  response.send('you reached the test endpoint');
+});
+
 app.get('/echo', function(request, response) {
 
   /*
