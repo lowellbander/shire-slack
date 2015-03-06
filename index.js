@@ -6,9 +6,25 @@ var app = express();
 app.set('port', (process.env.PORT || 5000));
 app.use(express.static(__dirname + '/public'));
 
+var MongoClient = require('mongodb').MongoClient
+  , assert = require('assert');
+  MongoClient.connect(process.env.MONGOLAB_URI, function(err, db) {
+    assert.equal(null, err);
+    console.log("connected correctly to server");
+    db.close();
+  });
+
 app.get('/', function(request, response) {
   response.send('Hello World!');
 });
+
+app.get('/mongo-test', function(request, response) {
+  MongoClient.connect(process.env.MONGOLAB_URI, function(err, db) {
+    assert.equal(null, err);
+    console.log('Slack successfully triggered a database connection');
+    db.close();
+  })
+})
 
 app.get('/test', function(request, response) {
 
