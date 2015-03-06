@@ -1,4 +1,4 @@
-var request = require('request');
+var Request = require('request');
 
 var express = require('express');
 var app = express();
@@ -11,7 +11,19 @@ app.get('/', function(request, response) {
 });
 
 app.get('/test', function(request, response) {
-  //
+
+  var options = {
+    uri: process.env.TEST_WEBHOOK,
+    form: '{"text": "This code ..."}'
+  };
+  Request.post(options, function(error, response, body) {
+    if (!error && response.statusCode == 200) {
+      console.log(body.name);
+    } else {
+      console.log('error: '+ response.statusCode + body);
+    } 
+  });
+
   response.send('you reached the test endpoint');
 });
 
