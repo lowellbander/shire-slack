@@ -18,6 +18,21 @@ app.get('/', function(request, response) {
   response.send('Hello World!');
 });
 
+// propose legislation
+app.get('/propose', function (request, response) {
+  MongoClient.connect(process.env.MONGOLAB_URI, function (err, db) {
+    var collection = db.collection('legislation');
+    var legislation = request.query.text;
+    var sponsor = request.query.user_name;
+    collection.insert([{
+      legislation: legislation,
+      sponsor: sponsor
+    }], function (err, result) {
+      console.log(sponsor + ': ' + legislation);
+    });
+  }); 
+});
+
 var insertDocuments = function (db, callback) {
     var collection = db.collection('documents');
     collection.insert([
