@@ -96,6 +96,27 @@ app.get('/vote', function (request, response) {
   });
 });
 
+app.get('/tally', function (request, response) {
+  //MongoClient.connect(process.env.MONGOLAB_API, function (err, db) {
+    //db.collection('legislation').findOne({});
+    //
+    // db.collection('legislation').find({}).toArray(function (err, docs) {
+    //     console.log(docs);
+    //   });
+  MongoClient.connect(process.env.MONGOLAB_URI, function (err, db) {
+    db.collection('legislation').find({_id:ObjectID(request.query.text)})
+      .toArray(function (err, items) {
+      console.log(items);
+    });
+    var tally = "The Tally";
+    console.log(tally);
+    
+  });
+    //notifyGovernment(tally);
+    
+  //});
+});
+
 var insertDocuments = function (db, callback) {
     var collection = db.collection('documents');
     collection.insert([
@@ -139,19 +160,6 @@ app.get('/test', function(request, response) {
 });
 
 app.get('/echo', function(request, response) {
-
-  /*
-  request.post(
-    process.env.TEST_WEBHOOK,
-    { form: { key: 'value' } },
-    function (error, response, body) {
-        if (!error && response.statusCode == 200) {
-            console.log(body)
-        }
-    }
-  );
-  */
-
   response.send('text: ' + request.query.text +
         ' and url is: ' + process.env.TEST_WEBHOOK);
 });
