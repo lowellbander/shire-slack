@@ -19,7 +19,7 @@ app.get('/', function(request, response) {
   response.send('Hello World!');
 });
 
-var notifyGovernment = function (message) {
+var notifyGovernment = function (message, callback) {
   var payload = '{"text": \"' + message + '\"}'
   var options = {
     uri: process.env.GOV_WEBHOOK,
@@ -28,6 +28,7 @@ var notifyGovernment = function (message) {
   Request.post(options, function(error, response, body) {
     if (!error && response.statusCode == 200) {
       console.log(body.name);
+      typeof callback === 'function' && callback();
     } else {
       console.log('error: '+ response.statusCode + body);
       console.log(payload);
@@ -97,20 +98,12 @@ app.get('/vote', function (request, response) {
 });
 
 app.get('/tally', function (request, response) {
-  //MongoClient.connect(process.env.MONGOLAB_API, function (err, db) {
-    //db.collection('legislation').findOne({});
-    //
-    // db.collection('legislation').find({}).toArray(function (err, docs) {
-    //     console.log(docs);
-    //   });
   MongoClient.connect(process.env.MONGOLAB_URI, function (err, db) {
     db.collection('legislation').find({_id:ObjectID(request.query.text)})
       .toArray(function (err, items) {
-      //console.log(items);
       if (items.length != 1) {
         // TODO
       } else {
-        //var message = JSON.stringify(items[0]);
         var result = items[0];
         var ayes = (result['ayes'].length != 0) 
           ? "Ayes: " + result['ayes'] :
@@ -121,23 +114,16 @@ app.get('/tally', function (request, response) {
         var abstains = (result['abstains'].length != 0) 
           ? "Ayes: " + result['ayes'] :
           "There are no abstains.";
-        notifyGovernment("Here is the current tally for bill `" +
-            result['_id'] + "`: _" + result['legislation'] + "_");
-        notifyGovernment(ayes); 
-        notifyGovernment(nays); 
-        notifyGovernment(abstains); 
+        var preface = "Here is the current tally for bill `" +
+            result['_id'] + "`: _" + result['legislation'] + "_";
 
-        //console.log(message);
-        //notifyGovernment(message);
+        notifyGovernment(preface, 
+            function () {return notifyGovernment(ayes,
+              function () {return notifyGovernment(nays, 
+                function () {return notifyGovernment(abstains)})})});
       }
     });
-    var tally = "The Tally";
-    //console.log(tally);
-    
   });
-    //notifyGovernment(tally);
-    
-  //});
 });
 
 var insertDocuments = function (db, callback) {
