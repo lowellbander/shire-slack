@@ -106,10 +106,33 @@ app.get('/tally', function (request, response) {
   MongoClient.connect(process.env.MONGOLAB_URI, function (err, db) {
     db.collection('legislation').find({_id:ObjectID(request.query.text)})
       .toArray(function (err, items) {
-      console.log(items);
+      //console.log(items);
+      if (items.length != 1) {
+        // TODO
+      } else {
+        //var message = JSON.stringify(items[0]);
+        var result = items[0];
+        var ayes = (result['ayes'].length != 0) 
+          ? "Ayes: " + result['ayes'] :
+          "There are no ayes.";
+        var nays = (result['nays'].length != 0) 
+          ? "Ayes: " + result['ayes'] :
+          "There are no nays.";
+        var abstains = (result['abstains'].length != 0) 
+          ? "Ayes: " + result['ayes'] :
+          "There are no abstains.";
+        notifyGovernment("Here is the current tally for bill `" +
+            result['_id'] + "`: _" + result['legislation'] + "_");
+        notifyGovernment(ayes); 
+        notifyGovernment(nays); 
+        notifyGovernment(abstains); 
+
+        //console.log(message);
+        //notifyGovernment(message);
+      }
     });
     var tally = "The Tally";
-    console.log(tally);
+    //console.log(tally);
     
   });
     //notifyGovernment(tally);
