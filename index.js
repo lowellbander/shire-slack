@@ -7,7 +7,8 @@ app.set('port', (process.env.PORT || 5000));
 app.use(express.static(__dirname + '/public'));
 
 var MongoClient = require('mongodb').MongoClient
-  , assert = require('assert');
+  , assert = require('assert')
+  , ObjectID = require('mongodb').ObjectID;
   MongoClient.connect(process.env.MONGOLAB_URI, function(err, db) {
     assert.equal(null, err);
     console.log("connected correctly to server");
@@ -42,7 +43,10 @@ app.get('/propose', function (request, response) {
     var sponsor = request.query.user_name;
     collection.insert([{
       legislation: legislation,
-      sponsor: sponsor
+      sponsor: sponsor,
+      ayes: [],
+      nays: [],
+      abstains: []
     }], function (err, result) {
       console.log(sponsor + ': ' + legislation);
       console.log(result);
@@ -54,6 +58,42 @@ app.get('/propose', function (request, response) {
       db.close();
     });
   }); 
+});
+
+app.get('/vote', function (request, response) {
+  var usage = function () {
+    console.log("usage: /vote <bill_ID> <aye|nay|abstain>");
+    // TODO: utilize webhook
+  };
+
+  var input = request.query.text.split(" ");
+  if (input.length != 2) {
+    usage();
+    return;
+  }
+  var id = input[0];
+  var vote = input[1];
+  if (vote != "aye" && vote != "nay" && vote != "abstain") {
+    usage(); 
+    return;
+  }
+  vote += "s";
+  console.log(vote);
+
+  MongoClient.connect(process.env.MONGOLAB_URI, function (err, db) {
+    var query = {$push : {}};
+    query['$push'][vote] = request.query.user_name;
+    console.log(query);
+    console.log(id);
+
+    db.collection('legislation').update({_id : ObjectID(id)}, query, 
+    function (err, result) {
+      assert.equal(err, null);
+      console.log(result);
+      console.log("Successfully added vote.");
+      db.close();
+    });
+  });
 });
 
 var insertDocuments = function (db, callback) {
